@@ -45,8 +45,7 @@ $(function() {
       var id = $this.data("id");
 
       var braintreeForm = new BraintreeHostedForm($paymentForm, $this, id);
-      return braintreeForm.initializeHostedFields().
-        then(braintreeForm.addFormHook(braintreeError)).
+      return braintreeForm.initializeHostedFields(braintreeError).
         fail(braintreeError);
     });
 

@@ -2,12 +2,37 @@ function BraintreeHostedForm($paymentForm, $hostedFields, paymentMethodId) {
   this.paymentForm = $paymentForm;
   this.hostedFields = $hostedFields;
   this.paymentMethodId = paymentMethodId;
+
+  this.errorCallback = null;
+
+  this.submitPending = false;
+  this.submitHandler = function(){};
+
+  this.bindSubmitHandler();
 }
 
-BraintreeHostedForm.prototype.initializeHostedFields = function() {
+BraintreeHostedForm.prototype.initializeHostedFields = function(errorCallback) {
+  this.errorCallback = errorCallback || null;
+
   return this.getToken().
     then(this.createClient.bind(this)).
-    then(this.createHostedFields())
+    then(this.createHostedFields()).
+    then(this.addFormHook())
+}
+
+BraintreeHostedForm.prototype.bindSubmitHandler = function() {
+  this.submitHandler = function(event) {
+    this.submitPending = true;
+  }
+
+  this.paymentForm.on("submit", function(event) {
+    if (this.hostedFields.is(":visible")) {
+      debugger
+      event.preventDefault();
+
+      this.submitHandler();
+    }
+  }.bind(this));
 }
 
 BraintreeHostedForm.prototype.promisify = function (fn, args, self) {
@@ -34,7 +59,7 @@ BraintreeHostedForm.prototype.getToken = function () {
     return data.client_token;
   }
 
-  return Spree.ajax(opts).then(onSuccess);
+  return Spree.ajax(opts).then(onSuccess, this.errorCallback);
 }
 
 BraintreeHostedForm.prototype.createClient = function (token) {
@@ -69,30 +94,24 @@ BraintreeHostedForm.prototype.createHostedFields = function () {
   }
 }
 
-BraintreeHostedForm.prototype.addFormHook = function (errorCallback) {
-  var self = this;
-  var shouldSubmit = false;
-
+BraintreeHostedForm.prototype.addFormHook = function (braintreeResponse) {
   function submit(payload) {
-    shouldSubmit = true;
-
-    $("#payment_method_nonce", self.hostedFields).val(payload.nonce);
-    self.paymentForm.submit();
+    $("#payment_method_nonce", this.hostedFields).val(payload.nonce);
+    this.paymentForm.submit();
   }
 
-  return function(hostedFields) {
-    self.paymentForm.on("submit", function(e) {
-      if (self.hostedFields.is(":visible") && !shouldSubmit) {
-        e.preventDefault()
-
-        hostedFields.tokenize(function(err, payload) {
-          if (err) {
-            errorCallback(err);
-          } else {
-            submit(payload);
-          }
-        })
+  this.submitHandler = function() {
+    braintreeResponse.tokenize(function(err, payload) {
+      if (err && self.errorCallback) {
+        self.errorCallback(err);
+      } else {
+        submit(payload);
       }
-    });
+    })
+  }
+
+  if(this.submitPending) {
+    this.submitPending = false;
+    this.submitHandler();
   }
 }

@@ -64,6 +64,7 @@ describe 'entering credit card details', type: :feature, js: true do
     # Attempt to submit an empty form once
     before(:each) do
       expect(page).to have_selector("input[type='submit']:enabled")
+      expect(page).to have_selector("iframe[type='number']")
       message = accept_prompt do
         click_button "Save and Continue"
       end
