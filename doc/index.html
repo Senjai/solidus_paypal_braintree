@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>
+  File: README
+  
+    &mdash; Documentation by YARD 0.9.9
+  
+</title>
+
+  <link rel="stylesheet" href="css/style.css" type="text/css" charset="utf-8" />
+
+  <link rel="stylesheet" href="css/common.css" type="text/css" charset="utf-8" />
+
+<script type="text/javascript" charset="utf-8">
+  pathId = "README";
+  relpath = '';
+</script>
+
+
+  <script type="text/javascript" charset="utf-8" src="js/jquery.js"></script>
+
+  <script type="text/javascript" charset="utf-8" src="js/app.js"></script>
+
+
+  </head>
+  <body>
+    <div class="nav_wrap">
+      <iframe id="nav" src="class_list.html?1"></iframe>
+      <div id="resizer"></div>
+    </div>
+
+    <div id="main" tabindex="-1">
+      <div id="header">
+        <div id="menu">
+  
+    <a href="_index.html">Index</a> &raquo; 
+    <span class="title">File: README</span>
+  
+</div>
+
+        <div id="search">
+  
+    <a class="full_list_link" id="class_list_link"
+        href="class_list.html">
+
+        <svg width="24" height="24">
+          <rect x="0" y="4" width="24" height="4" rx="1" ry="1"></rect>
+          <rect x="0" y="12" width="24" height="4" rx="1" ry="1"></rect>
+          <rect x="0" y="20" width="24" height="4" rx="1" ry="1"></rect>
+        </svg>
+    </a>
+  
+</div>
+        <div class="clear"></div>
+      </div>
+
+      <div id="content"><div id='filecontents'>
+<h1 id="label-SolidusPaypalBraintree">SolidusPaypalBraintree</h1>
+
+<p><a href="https://travis-ci.org/solidusio/solidus_paypal_braintree"><img
+src="https://travis-ci.org/solidusio/solidus_paypal_braintree.svg?branch=master"></a></p>
+
+<p><code>solidus_paypal_braintree</code> is an extension that adds support for
+using <a href="https://www.braintreepayments.com">Braintree</a> as a
+payment source in your <a href="https://solidus.io/">Solidus</a> store. It
+supports Apple Pay, PayPal, and credit card transactions.</p>
+
+<h2 id="label-Installation">Installation</h2>
+
+<p>Add solidus_paypal_braintree to your Gemfile:</p>
+
+<pre class="code ruby"><code class="ruby"><span class='id identifier rubyid_gem'>gem</span> <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>solidus_paypal_braintree</span><span class='tstring_end'>&#39;</span></span>
+</code></pre>
+
+<p>Bundle your dependencies and run the installation generator:</p>
+
+<pre class="code ruby"><code class="ruby"><span class='id identifier rubyid_bundle'>bundle</span>
+<span class='id identifier rubyid_bundle'>bundle</span> <span class='id identifier rubyid_exec'>exec</span> <span class='id identifier rubyid_rails'>rails</span> <span class='id identifier rubyid_g'>g</span> <span class='label'>solidus_paypal_braintree:</span><span class='id identifier rubyid_install'>install</span>
+</code></pre>
+
+<h2 id="label-Usage">Usage</h2>
+
+<p>This gem extends Solidus by providing a new payment method and source,
+named <code>SolidusPaypalBraintree::Gateway</code> and
+<code>SolidusPaypalBraintree::Source</code> respectively. All payment types
+- PayPal, ApplePay, and Credit Cards - are supported through the same
+payment method.</p>
+
+<p>The payment method requires 3 preferences to be set to process payments: -
+<code>merchant_id</code> - <code>public_key</code> -
+<code>private_key</code></p>
+
+<p>These values can be obtained by logging in to your Braintree account and
+going to <code>Account -&gt; My User</code> and clicking <code>View
+Authorizations</code> in the <strong>API Keys, Tokenization Keys,
+Encryption Keys</strong> section.</p>
+
+<p>The payment method also provides an optional preference
+<code>merchant_currency_map</code>. This preference allows users to provide
+different Merchant Account Ids for different currencies. If you only plan
+to accept payment in one currency, the defaut Merchant Account Id will be
+used and you can omit this option. An example of setting this preference
+can be found <a
+href="https://github.com/solidusio/solidus_paypal_braintree/blob/master/spec/spec_helper.rb#L70-L72">here</a>.</p>
+
+<h2 id="label-Store+Configuration">Store Configuration</h2>
+
+<p>This gem adds a configuration model -
+<code>SolidusPaypalBraintree::Configuration</code> - that belongs to
+<code>Spree::Store</code> as <code>braintree_configuration</code>. In
+multi-store Solidus applications, this model allows admins to
+enable/disable payment types on a per-store basis.</p>
+
+<p>The migrations for this gem will add a default configuration to all stores
+that has each payment type disabled. It also adds a
+<code>before_create</code> callback to <code>Spree::Store</code> that
+builds a default configuration. You can customize the default configuration
+that gets created by overriding the private
+<code>build_default_configuration</code> method on
+<code>Spree::Store</code>.</p>
+
+<p>A view override is provided that adds a <code>Braintree</code> tab to the
+admin settings submenu. Admins can go here to edit the configuration for
+each store.</p>
+
+<h2 id="label-Apple+Pay">Apple Pay</h2>
+
+<h3 id="label-Setup">Setup</h3>
+
+<p>Braintree has some <a
+href="https://developers.braintreepayments.com/guides/apple-pay/configuration/javascript/v3">excellent
+documentation</a> on what you&#39;ll need to do to get Apple Pay up and
+running.</p>
+
+<p>In order to make everything a little simpler, this extension includes some
+client-side code to get you started. Specifically, it provides some
+wrappers to help with the initialization of an Apple Pay session. The
+following is a relatively bare-bones implementation: “`javascript var
+applePayButton = document.getElementById(&#39;your-apple-pay-button&#39;);
+window.SolidusPaypalBraintree.fetchToken(function(clientToken) { 
+window.SolidusPaypalBraintree.initialize(clientToken,
+function(braintreeClient) { 
+window.SolidusPaypalBraintree.setupApplePay(braintreeClient,
+“YOUR-MERCHANT-ID”, funtion(applePayInstance) { 
+applePayButton.addEventListener(&#39;click&#39;, function() {
+beginApplePayCheckout(applePayInstance) });  }  } }</p>
+
+<p>beginApplePayCheckout = function(applePayInstance) { 
+window.SolidusPaypalBraintree.initializeApplePaySession({ 
+applePayInstance: applePayInstance,  storeName: &#39;Your Store Name&#39;, 
+currentUserEmail: Spree.current_email,  paymentMethodId:
+Spree.braintreePaymentMethodId,  }, (session) =&gt; {  // Add in your logic
+for onshippingcontactselected and onshippingmethodselected.  } }; “`</p>
+
+<p>For additional information checkout the <a
+href="https://developer.apple.com/reference/applepayjs/">Apple’s
+documentation</a> and <a
+href="https://developers.braintreepayments.com/guides/apple-pay/client-side/javascript/v3">Braintree’s
+documentation</a>.</p>
+
+<h3 id="label-Development">Development</h3>
+
+<p>Developing with Apple Pay has a few gotchas. First and foremost, you&#39;ll
+need to ensure you have access to a device running iOS 10+. (I&#39;ve heard
+there&#39;s also been progress on adding support to the Simulator.)</p>
+
+<p>Next, you&#39;ll need an Apple Pay sandbox account. You can check out
+Apple&#39;s <a
+href="https://developer.apple.com/support/apple-pay-sandbox/">documentation</a>
+for additional help in performing this step.</p>
+
+<p>Finally, Apple Pay requires the site to be served via HTTPS. I recommend
+setting up a proxy server to help solve this. There are <a
+href="https://www.google.ca/search?q=nginx+reverse+proxy+ssl+localhost">lots
+of guides</a> on how this can be achieved.</p>
+
+<h2 id="label-PayPal">PayPal</h2>
+
+<p>A default checkout view is provided that will display PayPal as a payment
+option. It will only be displayed if the
+<code>SolidusPaypalBraintree::Gateway</code> payment method is configured
+to display on the frontend and PayPal is enabled in the store&#39;s
+configuration.</p>
+
+<p>The checkout view <a
+href="/lib/views/frontend/spree/checkout/payment/_paypal_braintree.html.erb">initializes
+the PayPal button</a> using the <a
+href="https://developers.braintreepayments.com/guides/paypal/overview/javascript/v3">vault
+flow</a>, which allows the source to be reused.</p>
+
+<p>If you are creating your own checkout view or would like to customize the
+<a
+href="https://braintree.github.io/braintree-web/3.6.3/PayPal.html#tokenize">options
+that get passed to tokenize</a> , you can initialize your own using the
+<code>PaypalButton</code> JS object:</p>
+
+<pre class="code ruby"><code class="ruby">var button = new PaypalButton(document.querySelector(&quot;#your-button-id&quot;));
+
+button.initialize({
+  // your configuration options here
+});</code></pre>
+
+<p>After successful tokenization, a callback function is invoked that submits
+the transaction via AJAX and advances the order to confirm. It is possible
+to provide your own callback function to customize the behaviour after
+tokenize as follows:</p>
+
+<pre class="code ruby"><code class="ruby">var button = new PaypalButton(document.querySelector(&quot;#your-button-id&quot;));
+
+button.setTokenizeCallback(your-callback);</code></pre>
+
+<h2 id="label-Testing">Testing</h2>
+
+<p>First bundle your dependencies, then run <code>rake</code>.
+<code>rake</code> will default to building the dummy app if it does not
+exist, then it will run specs, and <a
+href="https://github.com/bbatsov/rubocop">Rubocop</a> static code analysis.
+The dummy app can be regenerated by using <code>rake test_app</code>.</p>
+
+<pre class="code ruby"><code class="ruby"><span class='id identifier rubyid_bundle'>bundle</span>
+<span class='id identifier rubyid_bundle'>bundle</span> <span class='id identifier rubyid_exec'>exec</span> <span class='id identifier rubyid_rake'>rake</span>
+</code></pre>
+
+<p>When testing your applications integration with this extension you may use
+it&#39;s factories. Simply add this require statement to your spec_helper:</p>
+
+<pre class="code ruby"><code class="ruby"><span class='id identifier rubyid_require'>require</span> <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>solidus_paypal_braintree/factories</span><span class='tstring_end'>&#39;</span></span>
+</code></pre>
+
+<p>Copyright © 2016 Stembolt, released under the New BSD License</p>
+</div></div>
+
+      <div id="footer">
+  Generated on Tue May 16 07:40:16 2017 by
+  <a href="http://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
+  0.9.9 (ruby-2.3.3).
+</div>
+
+    </div>
+  </body>
+</html>

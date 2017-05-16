@@ -1,0 +1,12 @@
+{
+    "source": {
+        "include": [ "app/assets" ],
+        "includePattern": ".+\\.js(doc|x)?$"
+    },
+    "plugins": ["plugins/markdown"],
+    "opts": {
+        "recurse": true,
+        "destination": "./doc/jsdoc",
+        "readme": "JSREADME.md"
+    }
+}

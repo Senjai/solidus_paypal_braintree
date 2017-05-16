@@ -6,8 +6,10 @@ begin
   require 'spree/testing_support/extension_rake'
   require 'rubocop/rake_task'
   require 'rspec/core/rake_task'
+  require 'yard'
 
   RSpec::Core::RakeTask.new(:spec)
+  YARD::Rake::YardocTask.new(:yard)
 
   RuboCop::RakeTask.new
 
@@ -27,4 +29,10 @@ desc 'Generates a dummy app for testing'
 task :test_app do
   ENV['LIB_NAME'] = 'solidus_paypal_braintree'
   Rake::Task['extension:test_app'].invoke
+end
+
+desc "Generates documentation for the app"
+task doc: :yard do
+  puts "Generating JSDoc"
+  abort "JSDoc failed!" unless system("jsdoc -c conf.json")
 end
