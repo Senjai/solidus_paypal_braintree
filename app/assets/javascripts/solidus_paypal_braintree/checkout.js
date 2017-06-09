@@ -57,6 +57,9 @@ $(function() {
   var $hostedFields = $("[data-braintree-hosted-fields]");
   var $submitButton = $("input[type='submit']", $paymentForm);
 
+  // Init solidus_paypal_braintree checkout code, now that we now everything is loaded.
+  SolidusPaypalBraintree.init();
+
   // If we're not using hosted fields, the form doesn't need to wait.
   if ($hostedFields.length > 0) {
     disableSubmit();

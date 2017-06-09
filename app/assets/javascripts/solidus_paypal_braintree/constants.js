@@ -1,10 +1,20 @@
 SolidusPaypalBraintree = {
   APPLY_PAY_API_VERSION: 1,
 
+  /*
+   * Invoke this when you are sure that Spree.pathFor is available.
+   * This will most of the time be on DOMContentLoaded
+   */
+  init: function init() {
+    // Need to override the paths dynamically, as we don't know the Solidus engine mount point while loading this file.
+    this.config.paths.clientTokens = Spree.pathFor('solidus_paypal_braintree/client_token');
+    this.config.paths.transactions = Spree.pathFor('solidus_paypal_braintree/transactions');
+  },
+
   config: {
     paths: {
-      clientTokens: Spree.pathFor('solidus_paypal_braintree/client_token'),
-      transactions: Spree.pathFor('solidus_paypal_braintree/transactions')
+      clientTokens: '/solidus_paypal_braintree/client_token',
+      transactions: '/solidus_paypal_braintree/transactions'
     },
 
     // Override to provide your own error messages.
